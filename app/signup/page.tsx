@@ -1,8 +1,42 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
+import { useRegisterMutation } from '../../lib/store/services/authApi';
+import { useRouter } from 'next/navigation';
+import { toast } from 'react-hot-toast';
 
 export default function SignupPage() {
+    const [formData, setFormData] = useState({
+        first_name: '',
+        last_name: '',
+        email: '',
+        password: '',
+        role: 'clinician' // Default role
+    });
+
+    const [register, { isLoading }] = useRegisterMutation();
+    const router = useRouter();
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            await register(formData).unwrap();
+            toast.success('Account created successfully! Please log in.');
+            // Assuming successful registration redirects to login or automatically logs in.
+            // For now, redirect to login with a success message query param or similar.
+            router.push('/login');
+        } catch (err: any) {
+            console.error('Registration failed:', err);
+            const msg = err.data?.detail || 'Registration failed. Please check your inputs.';
+            toast.error(msg);
+        }
+    };
+
     return (
         <div className="flex min-h-screen w-full flex-col lg:flex-row">
             {/* Left Side - Form Area */}
@@ -31,29 +65,98 @@ export default function SignupPage() {
                         </p>
                     </div>
 
-                    <form className="space-y-5">
+
+
+                    <form className="space-y-4" onSubmit={handleSubmit}>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="mb-1.5 block text-xs font-bold text-slate-900">First Name</label>
+                                <input
+                                    type="text"
+                                    name="first_name"
+                                    value={formData.first_name}
+                                    onChange={handleChange}
+                                    required
+                                    className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 focus:outline-none"
+                                />
+                            </div>
+                            <div>
+                                <label className="mb-1.5 block text-xs font-bold text-slate-900">Last Name</label>
+                                <input
+                                    type="text"
+                                    name="last_name"
+                                    value={formData.last_name}
+                                    onChange={handleChange}
+                                    required
+                                    className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 focus:outline-none"
+                                />
+                            </div>
+                        </div>
+
                         <div>
                             <label className="mb-1.5 block text-xs font-bold text-slate-900">
                                 Email <span className="text-rose-500">*</span>
                             </label>
                             <input
                                 type="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                required
                                 placeholder="name@example.com"
-                                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 focus:outline-none"
+                                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 focus:outline-none"
                             />
                         </div>
 
-                        <div className="flex items-start gap-3">
+                        <div>
+                            <label className="mb-1.5 block text-xs font-bold text-slate-900">
+                                Password <span className="text-rose-500">*</span>
+                            </label>
+                            <input
+                                type="password"
+                                name="password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                required
+                                placeholder="Create a password"
+                                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 focus:outline-none"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="mb-1.5 block text-xs font-bold text-slate-900">Role</label>
+                            <div className="relative">
+                                <select
+                                    name="role"
+                                    value={formData.role}
+                                    onChange={handleChange}
+                                    className="w-full appearance-none rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 focus:outline-none"
+                                >
+                                    <option value="clinician">Clinician</option>
+                                    <option value="patient">Patient</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                                <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex items-start gap-3 pt-2">
                             <div className="flex h-5 items-center">
-                                <input id="terms" type="checkbox" className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600" />
+                                <input id="terms" type="checkbox" required className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600" />
                             </div>
                             <label htmlFor="terms" className="text-xs text-slate-600 leading-5">
                                 I agree to the <a href="#" className="font-semibold text-indigo-700 underline decoration-indigo-700/30 underline-offset-2 hover:decoration-indigo-700">BAA</a> and <a href="#" className="font-semibold text-indigo-700 underline decoration-indigo-700/30 underline-offset-2 hover:decoration-indigo-700">Terms of use</a>
                             </label>
                         </div>
 
-                        <button type="button" className="w-full rounded-lg bg-indigo-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-200 transition-transform hover:bg-indigo-700 active:scale-[0.98]">
-                            Continue
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="w-full rounded-lg bg-indigo-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-200 transition-transform hover:bg-indigo-700 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                        >
+                            {isLoading ? 'Creating Account...' : 'Continue'}
                         </button>
                     </form>
 

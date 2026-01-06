@@ -3,9 +3,58 @@
 import Link from "next/link";
 import Navbar from "../components/shared/Navbar";
 import { useState } from "react";
+import { useLoginMutation } from "../../lib/store/services/authApi";
+import { useAppDispatch } from "../../lib/store/hooks";
+import { setCredentials } from "../../lib/store/features/authSlice";
+import { useRouter } from "next/navigation";
+import { toast } from 'react-hot-toast';
 
 export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+
+    const [login, { isLoading }] = useLoginMutation();
+    const dispatch = useAppDispatch();
+    const router = useRouter();
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            const result = await login({ email, password }).unwrap();
+
+            // Handle response based on screenshot: 
+            // { access_token: "...", token_type: "bearer", user: { id: 1, ... } }
+            const token = result.access_token || result.token || result.access;
+            const user = result.user || { email };
+
+            if (token) {
+                toast.success('Successfully logged in!');
+                localStorage.setItem('token', token);
+                localStorage.setItem('user', JSON.stringify(user));
+
+                dispatch(setCredentials({ user, token }));
+                router.push('/');
+            } else {
+                console.error("Login unexpected result:", result);
+                if (typeof result === 'string') {
+                    toast.success('Successfully logged in!');
+                    localStorage.setItem('token', result);
+                    const fallbackUser = { email };
+                    localStorage.setItem('user', JSON.stringify(fallbackUser));
+                    dispatch(setCredentials({ user: fallbackUser, token: result }));
+                    router.push('/');
+                } else {
+                    toast.error('Login succeeded but token was missing.');
+                }
+            }
+
+        } catch (err: any) {
+            console.error('Login failed:', err);
+            const msg = err.data?.detail || 'Login failed. Please check your credentials.';
+            toast.error(msg);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans">
@@ -29,11 +78,16 @@ export default function LoginPage() {
                             <p className="text-sm text-slate-500 mt-1">Sign in to access your personal AI health assistant</p>
                         </div>
 
-                        <form className="space-y-4">
+
+
+                        <form className="space-y-4" onSubmit={handleSubmit}>
                             <div>
                                 <label className="mb-1 block text-xs font-semibold uppercase text-slate-500">Email Address</label>
                                 <input
                                     type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
                                     className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-slate-800 outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all"
                                     placeholder="name@example.com"
                                 />
@@ -46,6 +100,9 @@ export default function LoginPage() {
                                 <div className="relative">
                                     <input
                                         type={showPassword ? "text" : "password"}
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
                                         className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 pr-10 text-slate-800 outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all"
                                         placeholder="••••••••"
                                     />
@@ -61,7 +118,7 @@ export default function LoginPage() {
                                             </svg>
                                         ) : (
                                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8-11-8z"></path>
                                                 <circle cx="12" cy="12" r="3"></circle>
                                             </svg>
                                         )}
@@ -69,8 +126,12 @@ export default function LoginPage() {
                                 </div>
                             </div>
 
-                            <button className="w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-bold text-white shadow-lg shadow-indigo-200 transition-all hover:bg-indigo-700 hover:shadow-xl hover:shadow-indigo-300/50 active:scale-95">
-                                Sign In
+                            <button
+                                type="submit"
+                                disabled={isLoading}
+                                className="w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-bold text-white shadow-lg shadow-indigo-200 transition-all hover:bg-indigo-700 hover:shadow-xl hover:shadow-indigo-300/50 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
+                            >
+                                {isLoading ? 'Signing In...' : 'Sign In'}
                             </button>
                         </form>
 
@@ -91,7 +152,7 @@ export default function LoginPage() {
                         </div>
 
                         <p className="mt-8 text-center text-xs text-slate-400">
-                            Don't have an account? <Link href="/" className="font-semibold text-indigo-600 hover:underline">Sign up</Link>
+                            Don't have an account? <Link href="/signup" className="font-semibold text-indigo-600 hover:underline">Sign up</Link>
                         </p>
                     </div>
 

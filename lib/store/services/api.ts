@@ -4,13 +4,14 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 export const baseApi = createApi({
     reducerPath: 'api',
     baseQuery: fetchBaseQuery({
-        baseUrl: process.env.NEXT_PUBLIC_API_URL || 'https://api.example.com/v1/',
+        baseUrl: '/api', // Use relative path to leverage Next.js Rewrites (avoids CORS)
         prepareHeaders: (headers, { getState }) => {
-            // Example: Get token from state and set Authorization header
-            // const token = (getState() as RootState).auth.token
-            // if (token) {
-            //   headers.set('authorization', `Bearer ${token}`)
-            // }
+            const token = (getState() as any).auth.token || localStorage.getItem('token');
+            if (token) {
+                headers.set('authorization', `Bearer ${token}`)
+            }
+            // Add this header just in case requests slip through or for server-side calls
+            headers.set('ngrok-skip-browser-warning', 'true');
             return headers;
         },
     }),

@@ -1,9 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
+import { useAppSelector } from '../../../lib/store/hooks';
+import ProfileDropdown from './ProfileDropdown';
 
 export default function Navbar() {
+    const { isAuthenticated } = useAppSelector((state) => state.auth);
+
+    // const handleLogout logic removed as it's now in ProfileDropdown
+
+
     return (
         <nav className="sticky top-0 z-50 w-full border-b border-slate-200/60 bg-white/80 backdrop-blur-md">
             <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -71,19 +78,25 @@ export default function Navbar() {
 
                 {/* Action Buttons */}
                 <div className="flex items-center gap-4">
-                    <Link
-                        href="/login"
-                        className="hidden text-sm font-semibold text-slate-600 hover:text-indigo-600 sm:block"
-                    >
-                        Log in
-                    </Link>
-                    <Link
-                        href="/signup"
-                        className="group relative inline-flex h-9 items-center justify-center overflow-hidden rounded-full bg-slate-900 px-6 font-medium text-white shadow-lg shadow-slate-200 transition-all hover:bg-slate-800 hover:shadow-xl hover:-translate-y-0.5"
-                    >
-                        <span className="relative z-10 text-sm">Get Started</span>
-                        <div className="absolute inset-0 -z-10 translate-y-[100%] bg-gradient-to-r from-indigo-500 to-violet-500 transition-transform duration-300 group-hover:translate-y-0" />
-                    </Link>
+                    {isAuthenticated ? (
+                        <ProfileDropdown />
+                    ) : (
+                        <>
+                            <Link
+                                href="/login"
+                                className="hidden text-sm font-semibold text-slate-600 hover:text-indigo-600 sm:block"
+                            >
+                                Log in
+                            </Link>
+                            <Link
+                                href="/signup"
+                                className="group relative inline-flex h-9 items-center justify-center overflow-hidden rounded-full bg-slate-900 px-6 font-medium text-white shadow-lg shadow-slate-200 transition-all hover:bg-slate-800 hover:shadow-xl hover:-translate-y-0.5"
+                            >
+                                <span className="relative z-10 text-sm">Get Started</span>
+                                <div className="absolute inset-0 -z-10 translate-y-[100%] bg-gradient-to-r from-indigo-500 to-violet-500 transition-transform duration-300 group-hover:translate-y-0" />
+                            </Link>
+                        </>
+                    )}
                 </div>
             </div>
         </nav>
