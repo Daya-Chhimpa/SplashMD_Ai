@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useAppSelector } from '../../../lib/store/hooks';
 import ProfileDropdown from './ProfileDropdown';
+import { toast } from 'react-hot-toast';
 
 export default function Navbar() {
     const { isAuthenticated } = useAppSelector((state) => state.auth);
@@ -29,69 +30,14 @@ export default function Navbar() {
                     </span>
                 </Link>
 
-                {/* Navigation Links */}
-                <div className="hidden md:flex items-center gap-8">
-                    {/* Features Dropdown */}
-                    <div className="group relative">
-                        <button className="flex items-center gap-1 text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors outline-none py-2">
-                            Features
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-200 group-hover:-rotate-180">
-                                <path d="m6 9 6 6 6-6" />
-                            </svg>
-                        </button>
-
-                        <div className="invisible absolute top-full left-1/2 -ml-32 mt-1 w-64 translate-y-2 rounded-xl border border-slate-100 bg-white p-2 opacity-0 shadow-xl shadow-slate-200/50 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
-                            {/* Invisible bridge to prevent closing when moving cursor from button to dropdown */}
-                            <div className="absolute -top-4 left-0 h-4 w-full bg-transparent" />
-
-                            <div className="space-y-0.5">
-                                <Link href="/features/ai-note-taker" className="block rounded-lg px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
-                                    AI Note Taker
-                                </Link>
-                                <Link href="/features/ai-treatment-planner" className="block rounded-lg px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
-                                    AI Treatment Planner
-                                </Link>
-                                <Link href="/features/ai-progress-tracker" className="block rounded-lg px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
-                                    AI Progress Tracker
-                                </Link>
-                                <Link href="/features/alliance-genie" className="block rounded-lg px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
-                                    Alliance Genie™
-                                </Link>
-                            </div>
-                        </div>
-                    </div>
-
-                    {[
-                        { label: 'How it Works', href: '#' },
-                        { label: 'Pricing', href: '#' },
-                        { label: 'About', href: '/about' }
-                        //   { label: 'How it Works', href: '/how-it-works' },
-                        // { label: 'Pricing', href: '/pricing' },
-                        // { label: 'About', href: '/about' }
-                    ].map((item) => (
-                        <Link
-                            key={item.label}
-                            href={item.href}
-                            className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors"
-                        >
-                            {item.label}
-                        </Link>
-                    ))}
-                </div>
+                {/* Navigation Links - HIDDEN */}
+                {/* <div className="hidden md:flex items-center gap-8">
+                </div> */}
 
                 {/* Action Buttons */}
                 <div className="flex items-center gap-4">
                     {isAuthenticated ? (
-                        <>
-                            <Link
-                                href="/scribe"
-                                className="hidden md:inline-flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-indigo-200 hover:bg-indigo-500 hover:shadow-lg transition-all active:scale-95"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                                Launch Scribe
-                            </Link>
-                            <ProfileDropdown />
-                        </>
+                        <ProfileDropdown />
                     ) : (
                         <>
                             <Link
