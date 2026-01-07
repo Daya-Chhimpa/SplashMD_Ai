@@ -64,7 +64,10 @@ export default function Navbar() {
                     {[
                         { label: 'How it Works', href: '#' },
                         { label: 'Pricing', href: '#' },
-                        { label: 'About', href: '#' }
+                        { label: 'About', href: '/about' }
+                        //   { label: 'How it Works', href: '/how-it-works' },
+                        // { label: 'Pricing', href: '/pricing' },
+                        // { label: 'About', href: '/about' }
                     ].map((item) => (
                         <Link
                             key={item.label}
