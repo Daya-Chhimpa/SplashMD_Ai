@@ -19,6 +19,8 @@ export default function ProfilePage() {
     const [formState, setFormState] = useState({
         first_name: '',
         last_name: '',
+        username: '',
+        role: 'patient', // Default
         email: '',
     });
 
@@ -27,15 +29,17 @@ export default function ProfilePage() {
             setFormState({
                 first_name: userData.first_name || '',
                 last_name: userData.last_name || '',
+                username: userData.username || '',
+                role: userData.role || 'patient',
                 email: userData.email || '',
             });
         } else if (user?.email) {
-            // Fallback if API hasn't loaded yet or failed but we have email from login
+            // Fallback
             setFormState(prev => ({ ...prev, email: user.email }));
         }
     }, [userData, user]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setFormState({ ...formState, [e.target.name]: e.target.value });
     };
 
@@ -115,6 +119,38 @@ export default function ProfilePage() {
                                     </div>
                                 </div>
 
+                                <div className="grid gap-6 md:grid-cols-2">
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Username</label>
+                                        <input
+                                            type="text"
+                                            name="username"
+                                            value={formState.username}
+                                            onChange={handleChange}
+                                            required
+                                            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 focus:outline-none placeholder-slate-400"
+                                            placeholder="Choose a username"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Role</label>
+                                        <div className="relative">
+                                            <select
+                                                name="role"
+                                                value={formState.role}
+                                                onChange={handleChange}
+                                                className="w-full appearance-none rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 focus:outline-none"
+                                            >
+                                                <option value="patient">Patient</option>
+                                                <option value="clinician">Clinician</option>
+                                            </select>
+                                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500">
+                                                <svg className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div>
                                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">Email Address</label>
                                     <input
@@ -122,10 +158,30 @@ export default function ProfilePage() {
                                         name="email"
                                         value={formState.email}
                                         onChange={handleChange}
-                                        disabled // Usually emails are not editable directly or require verification
+                                        disabled
                                         className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-slate-500 cursor-not-allowed"
                                     />
-                                    <p className="mt-1 text-xs text-slate-400">Email cannot be changed directly. Contact support for assistance.</p>
+                                    <p className="mt-1 text-xs text-slate-400">Email cannot be changed directly.</p>
+                                </div>
+
+                                {/* Account Information Section (Read Only) */}
+                                <div className="mt-8 pt-6 border-t border-slate-100">
+                                    <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Account Information</h3>
+                                    <div className="grid gap-6 md:grid-cols-2">
+                                        {/* Username & Role moved to editable section above */}
+                                        <div>
+                                            <label className="block text-xs font-semibold text-slate-500 mb-1">Member Since</label>
+                                            <div className="w-full rounded-lg border border-slate-100 bg-slate-50/50 px-3 py-2 text-slate-700 text-sm">
+                                                {userData?.created_at ? new Date(userData.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold text-slate-500 mb-1">Last Login</label>
+                                            <div className="w-full rounded-lg border border-slate-100 bg-slate-50/50 px-3 py-2 text-slate-700 text-sm">
+                                                {userData?.last_login ? new Date(userData.last_login).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : 'Never'}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div className="pt-4 flex justify-end gap-3">
